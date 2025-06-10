@@ -1,4 +1,3 @@
-
 def time_cor(cor):
     cor += 10
     return cor
