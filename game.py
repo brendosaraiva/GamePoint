@@ -21,11 +21,11 @@ def main():
     time_laranja = 0
     time_branco = 0
 
-    qnt_equipe: int = int(input("Quantas equipes? "))
+    qnt_equipe = int(input("Quantas equipes? "))
 
     while True:
         print("O ponto vai para quem? ")
-        equipe: str = input("Time: ")
+        equipe = input("Time: ")
 
         if equipe.capitalize() == "Vermelho":
             time_vermelho = time_cor(time_vermelho)
@@ -47,7 +47,7 @@ def main():
         else:
             print("Cor inválida!!!")
 
-        continuar: str = input("Quer continuar? ")
+        continuar = input("Quer continuar? ")
 
         if continuar == "S":
             pass
