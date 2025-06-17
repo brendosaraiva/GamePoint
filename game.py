@@ -3,8 +3,7 @@ def time_cor(cor):
     return cor
 
 
-def equipes(q, times):
-    cores = ["Vermelho", "Azul", "Verde", "Amarelo", "Laranja", "Branco"]
+def equipes(q, times, cores):
     times_partida = {}
 
     for c in range(1, q+1):
@@ -54,7 +53,8 @@ def main():
 
         else:
             times = [time_vermelho, time_azul, time_verde, time_amarelo, time_laranja, time_branco]
-            print(equipes(qnt_equipe, times))
+            cores = ["Vermelho", "Azul", "Verde", "Amarelo", "Laranja", "Branco"]
+            print(equipes(qnt_equipe, times, cores))
             break
 
 
