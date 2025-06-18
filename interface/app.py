@@ -1,10 +1,11 @@
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtGui import QIcon, QPixmap, QFont
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout,
     QLabel, QPushButton, QGroupBox, QScrollArea, QMessageBox
 )
 import sys
+from game import time_cor  # sua função para pontuar
 
 
 class JanelaPrincipal(QWidget):
@@ -17,18 +18,20 @@ class JanelaPrincipal(QWidget):
                 color: #FFFFFF;
             }
         """)
+        self.pontos = 0
+        self.times_pontuacao = []
 
-        layout_principal = QVBoxLayout(self)  # Cria e seta layout principal
+        layout_principal = QVBoxLayout(self)  # Layout principal
 
         label_imagem = QLabel()
-        pixmap = QPixmap("gamepoint.png")  # caminho da sua imagem
+        pixmap = QPixmap("gamepoint.png")  # caminho da imagem
         label_imagem.setPixmap(pixmap)
 
         icon = QIcon("gamepoint.ico")
         icon.addPixmap(QPixmap("icone_64x64.png"))
         self.setWindowIcon(QIcon(icon))
 
-        # Layout horizontal para imagem + botão limpar lado a lado
+        # Layout topo: imagem + botão limpar + botão finalizar
         layout_topo = QHBoxLayout()
         layout_topo.addWidget(label_imagem, alignment=Qt.AlignVCenter)
 
@@ -36,6 +39,11 @@ class JanelaPrincipal(QWidget):
         self.botao_limpar.clicked.connect(self.limpar_secoes)
         self.botao_limpar.setFixedSize(100, 30)
         layout_topo.addWidget(self.botao_limpar, alignment=Qt.AlignVCenter)
+
+        self.botao_finalizar = QPushButton("Finalizar Partida")
+        self.botao_finalizar.clicked.connect(self.finalizar_partida)
+        self.botao_finalizar.setFixedSize(120, 30)
+        layout_topo.addWidget(self.botao_finalizar, alignment=Qt.AlignVCenter)
 
         layout_principal.addLayout(layout_topo)
 
@@ -54,34 +62,51 @@ class JanelaPrincipal(QWidget):
         self.botao_adicionar.clicked.connect(self.adicionar_nova_secao)
         self.atualizar_posicao_adicionar()
 
-    def criar_secao(self, titulo):
+    def criar_secao(self, titulo, cor):
         box = QGroupBox(titulo)
         box.setMaximumSize(500, 500)
         layout = QVBoxLayout()
 
-        # Adiciona o ícone no topo
         label_icone = QLabel()
-        pixmap = QPixmap("icone.png")  # Substitua pelo caminho do seu ícone
-        label_icone.setPixmap(pixmap.scaledToWidth(32))  # Ajuste o tamanho se quiser
+        pixmap = QPixmap("icone.png")
+        label_icone.setPixmap(pixmap.scaledToWidth(32))
         layout.addWidget(label_icone)
 
-        # Conteúdo da seção
-        layout.addWidget(QLabel("Conteúdo da seção"))
-        layout.addWidget(QPushButton("Botão Exemplo"))
+        pontuacao = QLabel(f"{self.pontos}")
+        fonte = QFont()
+        fonte.setPointSize(80)
+        pontuacao.setFont(fonte)
+        pontuacao.setAlignment(Qt.AlignCenter)  # Centraliza a pontuação
+
+        cor_time = QLabel(cor)
+        fonte = QFont()
+        fonte.setPointSize(50)
+        cor_time.setFont(fonte)
+        cor_time.setAlignment(Qt.AlignCenter)  # Centraliza a pontuação
+
+        layout.addWidget(cor_time, alignment=Qt.AlignCenter)
+        layout.addWidget(pontuacao)
+
+        botao_pontuar = QPushButton("Pontuar")
+        # Ao clicar, chama a função time_cor e atualiza o label
+        botao_pontuar.clicked.connect(lambda _, label=pontuacao: time_cor(label, cor))
+        layout.addWidget(botao_pontuar)
 
         box.setLayout(layout)
+        self.times_pontuacao.append(pontuacao)
         return box
 
     def adicionar_nova_secao(self):
-        if self.total_secoes < 6:
+        cores = ["Vermelho", "Azul", "Verde", "Amarelo", "Laranja", "Branco"]
+        if self.total_secoes < len(cores):
             titulo = f"Time {self.total_secoes + 1}"
-            nova_secao = self.criar_secao(titulo)
+            cor = cores[self.total_secoes]
+            nova_secao = self.criar_secao(titulo, cor)
 
             linha = self.total_secoes // 3
             coluna = self.total_secoes % 3
 
             self.grid_layout.addWidget(nova_secao, linha, coluna)
-
             self.total_secoes += 1
             self.atualizar_posicao_adicionar()
         else:
@@ -109,6 +134,32 @@ class JanelaPrincipal(QWidget):
 
         self.total_secoes = 0
         self.atualizar_posicao_adicionar()
+
+    def time_mais_pontuado(self):
+        if not self.times_pontuacao:
+            return None
+
+        maior_pontos = -1
+        indice_maior = -1
+
+        for i, label in enumerate(self.times_pontuacao):
+            pontos = int(label.text())
+            if pontos > maior_pontos:
+                maior_pontos = pontos
+                indice_maior = i
+
+        return indice_maior, maior_pontos
+
+    def finalizar_partida(self):
+        resultado = self.time_mais_pontuado()
+        if resultado is None:
+            QMessageBox.information(self, "Resultado", "Nenhum time pontuado.")
+        else:
+            indice, pontos = resultado
+            QMessageBox.information(
+                self,
+                "Resultado",
+                f"O time {indice + 1} é o vencedor com {pontos} pontos!")
 
 
 if __name__ == "__main__":

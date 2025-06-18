@@ -1,64 +1,24 @@
-def time_cor(cor):
-    cor += 10
-    return cor
+from PySide6.QtWidgets import QLabel
 
 
-def equipes(q, times, cores):
-    times_partida = {}
+def time_cor(label: QLabel, cor: str):
+    valor = int(label.text())
+    valor += 10
+    label.setText(str(valor))
 
-    for c in range(1, q+1):
-        times_partida[cores[c-1]] = times[c-1]
+    # Apenas exemplo de uso de cor
+    if cor == "Vermelho":
+        label.setStyleSheet("color: red")
+    elif cor == "Azul":
+        label.setStyleSheet("color: lightblue")
+    elif cor == "Verde":
+        label.setStyleSheet("color: green")
+    elif cor == "Amarelo":
+        label.setStyleSheet("color: yellow")
+    elif cor == "Laranja":
+        label.setStyleSheet("color: orange")
+    elif cor == "Branco":
+        label.setStyleSheet("color: white")
 
-    return times_partida
-
-
-def main():
-    time_vermelho = 0
-    time_azul = 0
-    time_verde = 0
-    time_amarelo = 0
-    time_laranja = 0
-    time_branco = 0
-
-    qnt_equipe = int(input("Quantas equipes? "))
-
-    while True:
-        print("O ponto vai para quem? ")
-        equipe = input("Time: ")
-
-        if equipe.capitalize() == "Vermelho":
-            time_vermelho = time_cor(time_vermelho)
-
-        elif equipe.capitalize() == "Azul":
-            time_azul = time_cor(time_azul)
-
-        elif equipe.capitalize() == "Verde":
-            time_verde = time_cor(time_verde)
-
-        elif equipe.capitalize() == "Amarelo":
-            time_amarelo = time_cor(time_amarelo)
-
-        elif equipe.capitalize() == "Laranja":
-            time_laranja = time_cor(time_laranja)
-
-        elif equipe.capitalize() == "Branco":
-            time_branco = time_cor(time_branco)
-        else:
-            print("Cor inválida!!!")
-
-        continuar = input("Quer continuar? ")
-
-        if continuar == "S":
-            pass
-
-        else:
-            times = [time_vermelho, time_azul, time_verde, time_amarelo, time_laranja, time_branco]
-            cores = ["Vermelho", "Azul", "Verde", "Amarelo", "Laranja", "Branco"]
-            print(equipes(qnt_equipe, times, cores))
-            break
-
-
-if __name__ == "__main__":
-    main()
 
 
