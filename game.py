@@ -6,7 +6,7 @@ def time_cor(label: QLabel, cor: str):
     valor += 10
     label.setText(str(valor))
 
-    # Apenas exemplo de uso de cor
+    # Cores usadas para modificar as cores dos botões de pontos
     if cor == "Vermelho":
         label.setStyleSheet("color: red")
     elif cor == "Azul":
@@ -19,6 +19,3 @@ def time_cor(label: QLabel, cor: str):
         label.setStyleSheet("color: orange")
     elif cor == "Branco":
         label.setStyleSheet("color: white")
-
-
-

@@ -5,7 +5,7 @@ from PySide6.QtWidgets import (
     QLabel, QPushButton, QGroupBox, QScrollArea, QMessageBox
 )
 import sys
-from game import time_cor  # sua função para pontuar
+from game import time_cor
 
 
 class JanelaPrincipal(QWidget):
@@ -93,7 +93,7 @@ class JanelaPrincipal(QWidget):
         layout.addWidget(botao_pontuar)
 
         box.setLayout(layout)
-        self.times_pontuacao.append(pontuacao)
+        self.times_pontuacao.append((pontuacao, cor))
         return box
 
     def adicionar_nova_secao(self):
@@ -142,7 +142,7 @@ class JanelaPrincipal(QWidget):
         maior_pontos = -1
         indice_maior = -1
 
-        for i, label in enumerate(self.times_pontuacao):
+        for i, (label, cor) in enumerate(self.times_pontuacao):
             pontos = int(label.text())
             if pontos > maior_pontos:
                 maior_pontos = pontos
@@ -156,10 +156,11 @@ class JanelaPrincipal(QWidget):
             QMessageBox.information(self, "Resultado", "Nenhum time pontuado.")
         else:
             indice, pontos = resultado
+            _, cor = self.times_pontuacao[indice]
             QMessageBox.information(
                 self,
                 "Resultado",
-                f"O time {indice + 1} é o vencedor com {pontos} pontos!")
+                f"A equipe {cor} é a vencedora com {pontos} pontos!")
 
 
 if __name__ == "__main__":
