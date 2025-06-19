@@ -1,11 +1,22 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSettings
 from PySide6.QtGui import QIcon, QPixmap, QFont
 from PySide6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QGridLayout, QHBoxLayout,
     QLabel, QPushButton, QGroupBox, QScrollArea, QMessageBox
 )
 import sys
-from game import time_cor
+from times import time_cor
+import sys
+import os
+
+
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 
 class JanelaPrincipal(QWidget):
@@ -20,34 +31,43 @@ class JanelaPrincipal(QWidget):
         """)
         self.pontos = 0
         self.times_pontuacao = []
+        self.total_secoes = 0
+        self.settings = QSettings("MinhaEmpresa", "GamePoint")
 
-        layout_principal = QVBoxLayout(self)  # Layout principal
+        layout_principal = QVBoxLayout(self)
 
         label_imagem = QLabel()
-        pixmap = QPixmap("gamepoint.png")  # caminho da imagem
+        pixmap = QPixmap(resource_path("gamepoint.png"))
         label_imagem.setPixmap(pixmap)
 
-        icon = QIcon("gamepoint.ico")
-        icon.addPixmap(QPixmap("icone_64x64.png"))
-        self.setWindowIcon(QIcon(icon))
+        icon = QIcon(resource_path("gamepoint.ico"))
+        icon.addPixmap(QPixmap(resource_path("icone_64x64.png")))
+        self.setWindowIcon(icon)
 
-        # Layout topo: imagem + botão limpar + botão finalizar
         layout_topo = QHBoxLayout()
         layout_topo.addWidget(label_imagem, alignment=Qt.AlignVCenter)
+
+        self.botao_salvar = QPushButton("Salvar Partida")
+        self.botao_salvar.clicked.connect(self.salvar_partida)
+        self.botao_salvar.setFixedSize(120, 30)
+        layout_topo.addWidget(self.botao_salvar)
+
+        self.botao_carregar = QPushButton("Abrir Save")
+        self.botao_carregar.clicked.connect(self.carregar_partida)
+        self.botao_carregar.setFixedSize(120, 30)
+        layout_topo.addWidget(self.botao_carregar)
 
         self.botao_limpar = QPushButton("Limpar Seções")
         self.botao_limpar.clicked.connect(self.limpar_secoes)
         self.botao_limpar.setFixedSize(100, 30)
-        layout_topo.addWidget(self.botao_limpar, alignment=Qt.AlignVCenter)
+        layout_topo.addWidget(self.botao_limpar)
 
         self.botao_finalizar = QPushButton("Finalizar Partida")
         self.botao_finalizar.clicked.connect(self.finalizar_partida)
         self.botao_finalizar.setFixedSize(120, 30)
-        layout_topo.addWidget(self.botao_finalizar, alignment=Qt.AlignVCenter)
+        layout_topo.addWidget(self.botao_finalizar)
 
         layout_principal.addLayout(layout_topo)
-
-        self.total_secoes = 0
 
         self.scroll_area = QScrollArea()
         self.scroll_area.setWidgetResizable(True)
@@ -161,6 +181,39 @@ class JanelaPrincipal(QWidget):
                 self,
                 "Resultado",
                 f"A equipe {cor} é a vencedora com {pontos} pontos!")
+
+    def salvar_partida(self):
+        self.settings.setValue("total", self.total_secoes)
+        for i, (label, cor) in enumerate(self.times_pontuacao):
+            self.settings.setValue(f"time_{i}_cor", cor)
+            self.settings.setValue(f"time_{i}_pontos", label.text())
+        QMessageBox.information(self, "Salvo", "Partida salva com sucesso!")
+
+    def carregar_partida(self):
+        self.limpar_secoes()
+        total = self.settings.value("total", 0, type=int)
+        self.times_pontuacao = []  # <- Corrige o problema principal
+
+        for i in range(total):
+            cor = self.settings.value(f"time_{i}_cor", "")
+            pontos = self.settings.value(f"time_{i}_pontos", "0")
+            nova_secao = self.criar_secao(f"Time {i + 1}", cor)
+
+            linha = self.total_secoes // 3
+            coluna = self.total_secoes % 3
+
+            # Ajustar pontuação visual:
+            label_pontos = nova_secao.findChildren(QLabel)[2]  # 0: ícone, 1: cor, 2: pontos
+            label_pontos.setText(str(pontos))
+
+            # Atualizar lista times_pontuacao com o label correto
+            self.times_pontuacao[-1] = (label_pontos, cor)
+
+            self.grid_layout.addWidget(nova_secao, linha, coluna)
+            self.total_secoes += 1
+
+        self.atualizar_posicao_adicionar()
+        QMessageBox.information(self, "Carregado", "Partida carregada com sucesso!")
 
 
 if __name__ == "__main__":
